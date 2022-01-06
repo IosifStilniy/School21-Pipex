@@ -46,6 +46,7 @@ static int	executor(int argn, char **argv)
 		return (error_handler(argn, argv, -1));
 	buf = ft_strjoin("/", flags[0]);
 	path = pathdefiner(buf);
+	free(buf);
 	if (!path)
 		return (error_handler(argn, argv, -1));
 	else
@@ -53,14 +54,15 @@ static int	executor(int argn, char **argv)
 	exit(1);
 }
 
-static int	grand_finale(int pidcount, pid_t *pids)
+static int	grand_finale(int pidcount, pid_t *pids, char **argv)
 {
 	int	i;
 	int	stat_lock;
 
 	i = 0;
 	while (++i < pidcount)
-		waitpid(pids[i], &stat_lock, WUNTRACED);
+		error_handler(0, argv, waitpid(pids[i], &stat_lock, WUNTRACED));
+	free(pids);
 	return (WEXITSTATUS(stat_lock));
 }
 
@@ -113,5 +115,5 @@ int	main(int argc, char **argv)
 		error_handler(0, argv, -1);
 	pidsfd[0] = fd[0];
 	forker(argc - 2, argv, nullfd, pidsfd);
-	return (grand_finale(argc - 2, pidsfd));
+	return (grand_finale(argc - 2, pidsfd, argv));
 }
