@@ -1,6 +1,6 @@
 #include "pipex_bonus.h"
 
-char	*pathdefiner(char *prog)
+static char	*pathdefiner(char *prog)
 {
 	char	**path;
 	char	*bpath;
@@ -29,7 +29,7 @@ char	*pathdefiner(char *prog)
 	return (NULL);
 }
 
-int	executor(int argn, char **argv)
+static int	executor(int argn, char **argv)
 {
 	char	**flags;
 	char	*buf;
@@ -56,14 +56,15 @@ int	executor(int argn, char **argv)
 static int	grand_finale(int pidcount, pid_t *pids)
 {
 	int	i;
+	int	stat_lock;
 
 	i = 0;
 	while (++i < pidcount)
-		waitpid(pids[i], NULL, 0);
-	return (0);
+		waitpid(pids[i], &stat_lock, WUNTRACED);
+	return (WEXITSTATUS(stat_lock));
 }
 
-int	forker(int argn, char **argv, int rightpfd[2], pid_t *pidsfd)
+static int	forker(int argn, char **argv, int rightpfd[2], pid_t *pidsfd)
 {
 	int		leftpfd[2];
 
